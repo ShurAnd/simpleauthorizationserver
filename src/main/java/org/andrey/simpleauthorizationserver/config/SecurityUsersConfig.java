@@ -1,11 +1,13 @@
 package org.andrey.simpleauthorizationserver.config;
 
-import org.andrey.simpleauthorizationserver.security.JdbcUserDetailsRepository;
 import org.andrey.simpleauthorizationserver.security.JdbcUserDetailsService;
+import org.andrey.simpleauthorizationserver.security.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -15,11 +17,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class SecurityUsersConfig {
 
-    private JdbcUserDetailsRepository repository;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public SecurityUsersConfig(JdbcUserDetailsRepository repository){
-        this.repository = repository;
+    public SecurityUsersConfig(JdbcTemplate jdbcTemplate){
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     /**
@@ -27,7 +29,18 @@ public class SecurityUsersConfig {
      */
     @Bean
     public UserDetailsService userDetailsService(){
-        return new JdbcUserDetailsService(repository);
+        JdbcUserDetailsService userDetailsService = new JdbcUserDetailsService(jdbcTemplate);
+
+        try{
+            userDetailsService.loadUserByUsername("andrey");
+        } catch (UsernameNotFoundException e) {
+            User andreyUser = new User();
+            andreyUser.setUsername("andrey");
+            andreyUser.setPassword(passwordEncoder().encode("andrey"));
+            userDetailsService.saveNewUser(andreyUser);
+        }
+
+        return userDetailsService;
     }
 
 
