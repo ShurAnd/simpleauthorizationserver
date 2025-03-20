@@ -24,6 +24,12 @@ repositories {
 }
 
 dependencies {
+	// https://mvnrepository.com/artifact/org.postgresql/postgresql
+	implementation("org.postgresql:postgresql:42.7.5")
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-jdbc
+	implementation("org.springframework.boot:spring-boot-starter-jdbc:3.4.3")
+	// https://mvnrepository.com/artifact/org.springframework.data/spring-data-jdbc
+	implementation("org.springframework.data:spring-data-jdbc:3.4.3")
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
