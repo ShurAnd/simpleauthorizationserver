@@ -38,7 +38,7 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception{
 
         // Включаем аутентикацию по логин паролю
         http

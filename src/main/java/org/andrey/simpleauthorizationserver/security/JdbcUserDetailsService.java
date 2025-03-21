@@ -28,7 +28,7 @@ public class JdbcUserDetailsService implements UserDetailsService {
         String userSql = "Select username, password from users where username = ?";
         String authoritySql = "Select authority from authorities where username = ?";
 
-        User u = jdbcTemplate.queryForObject(userSql, (r, i) -> {
+        List<User> result = jdbcTemplate.query(userSql, (r, i) -> {
            String uname = r.getString("username");
            String upass = r.getString("password");
 
@@ -39,14 +39,16 @@ public class JdbcUserDetailsService implements UserDetailsService {
            return user;
         }, username);
 
+        if (result.isEmpty()){
+            throw new UsernameNotFoundException("Username " + username + " not found!");
+        }
+
+        User u = result.getFirst();
+
         List<String> authorities = new ArrayList<>();
         authorities = jdbcTemplate.query(authoritySql,
                 (r, i) -> r.getString("authority"),
                 username);
-
-        if (u == null){
-            throw new UsernameNotFoundException("Username " + username + " not found!");
-        }
 
         u.setAuthorities(authorities);
 
@@ -57,7 +59,11 @@ public class JdbcUserDetailsService implements UserDetailsService {
      * Метод для сохранения нового пользователя в БД
      */
     public void saveNewUser(User user){
-        String sql = "Insert into users (username, password) values (?, ?)";
-        jdbcTemplate.update(sql, user.getUsername(), user.getPassword());
+        String sqlUsers = "Insert into users (username, password) values (?, ?)";
+        String sqlAuthorities = "Insert into authorities (username, authority) values (?, ?)";
+        jdbcTemplate.update(sqlUsers, user.getUsername(), user.getPassword());
+        String sqlGetUserId = "Select id from users where username = ?";
+        Long id = jdbcTemplate.queryForObject(sqlGetUserId, (r, i) -> r.getLong("id"), user.getUsername());
+        jdbcTemplate.update(sqlAuthorities, id, user.getPassword());
     }
 }
